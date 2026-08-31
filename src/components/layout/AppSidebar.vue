@@ -15,11 +15,18 @@ const englishSetsStore = useEnglishSetsStore()
 
 const route = useRoute()
 
-const footerBadges: Record<string, { title: string; subtitle: string }> = {
+interface FooterBadge {
+  title: string
+  subtitle: string
+  extra?: string
+  progress?: number
+}
+
+const footerBadges: Record<string, FooterBadge> = {
   shopping: { title: 'Tropiciel Sklepowy', subtitle: 'Aktywny' },
 }
 
-const footerBadge = computed(() => {
+const footerBadge = computed<FooterBadge>(() => {
   if (route.name === 'ogar-english') {
     const level = englishSetsStore.levelStats
     return {

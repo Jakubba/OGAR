@@ -9,6 +9,7 @@ import {
   type CatalogType,
   type TmdbDiscoverResult,
 } from '@/lib/tmdb'
+import { useMobileReveal } from '@/composables/useMobileReveal'
 
 const props = withDefaults(defineProps<{ excludedKeys?: Set<string> }>(), { excludedKeys: () => new Set() })
 const emit = defineEmits<{ 'open-details': [item: TmdbDiscoverResult] }>()
@@ -21,6 +22,7 @@ const page = ref(1)
 
 const items = ref<TmdbDiscoverResult[]>([])
 const visibleItems = computed(() => items.value.filter((item) => !props.excludedKeys.has(`${item.mediaType}:${item.id}`)))
+const { isMobile, displayedItems, canShowMore, showMore } = useMobileReveal(visibleItems)
 const hasNextPage = ref(false)
 const loading = ref(false)
 const error = ref('')
@@ -95,7 +97,7 @@ onMounted(load)
     <div class="flex flex-wrap gap-2 mb-4">
       <select
         v-model="typeFilter"
-        class="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
+        class="w-full sm:w-auto min-h-[37px] px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
       >
         <option value="all">Wszystko</option>
         <option value="movie">Filmy</option>
@@ -103,7 +105,7 @@ onMounted(load)
       </select>
       <select
         v-model="genreFilter"
-        class="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
+        class="w-full sm:w-auto min-h-[37px] px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
       >
         <option value="">Wszystkie gatunki</option>
         <option v-for="g in TMDB_GENRE_NAMES" :key="g" :value="g">{{ g }}</option>
@@ -112,11 +114,11 @@ onMounted(load)
         v-model="yearFilter"
         type="number"
         placeholder="Rok wydania"
-        class="w-28 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-500"
+        class="w-full sm:w-28 min-h-[37px] px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-500"
       />
       <select
         v-model="sort"
-        class="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
+        class="w-full sm:w-auto min-h-[37px] px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
       >
         <option value="popularity">Popularność</option>
         <option value="title_asc">Nazwa (A-Z)</option>
@@ -134,13 +136,13 @@ onMounted(load)
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
       <button
-        v-for="item in visibleItems"
+        v-for="item in displayedItems"
         :key="`${item.mediaType}:${item.id}`"
         type="button"
         @click="emit('open-details', item)"
         class="text-left rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/60 overflow-hidden flex flex-col hover:border-orange-500/40 transition-all cursor-pointer"
       >
-        <div class="h-32 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-950 relative flex items-center justify-center overflow-hidden">
+        <div class="aspect-[5/2] w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-950 relative flex items-center justify-center overflow-hidden">
           <img v-if="item.posterUrl" :src="item.posterUrl" :alt="item.title" class="w-full h-full object-cover" />
           <Clapperboard v-else class="w-8 h-8 text-slate-400 dark:text-slate-700" />
           <span class="absolute top-2 right-2 text-[9px] font-bold bg-black/70 text-slate-200 px-1.5 py-0.5 rounded">
@@ -161,7 +163,16 @@ onMounted(load)
       </p>
     </div>
 
-    <div v-if="!loading && items.length" class="flex items-center justify-center gap-3 mt-5">
+    <button
+      v-if="canShowMore"
+      type="button"
+      @click="showMore"
+      class="w-full mt-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-orange-500/40 transition-all cursor-pointer"
+    >
+      Pokaż więcej
+    </button>
+
+    <div v-if="!loading && items.length && !isMobile" class="flex items-center justify-center gap-3 mt-5">
       <button
         type="button"
         @click="prevPage"

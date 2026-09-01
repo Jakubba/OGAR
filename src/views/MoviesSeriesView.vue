@@ -1,20 +1,21 @@
 <script setup lang="ts">
 import { computed, onUnmounted, reactive, ref, watch as vueWatch } from 'vue'
-import { Check, Clapperboard, Eye, Loader2, Search, Shuffle, Star, Trash2, X } from 'lucide-vue-next'
+import { Check, Clapperboard, Eye, Filter, Loader2, Search, Shuffle, Star, Trash2, X } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useMoviesStore, type Movie, type MovieStatus } from '@/stores/movies'
 import {
   getRandomDiscoverBatch,
   isTmdbConfigured,
   searchMovies,
-  TMDB_GENRE_NAMES,
   type TmdbDiscoverResult,
   type TmdbSearchResult,
 } from '@/lib/tmdb'
 import RandomDrawModal, { type DrawItem } from '@/components/media/RandomDrawModal.vue'
 import MovieDetailsModal, { type MovieAddPayload } from '@/components/media/MovieDetailsModal.vue'
 import MovieCatalogPanel from '@/components/media/MovieCatalogPanel.vue'
+import SuperFilterPanel from '@/components/media/SuperFilterPanel.vue'
 import { PLATFORMS } from '@/lib/moviePlatforms'
+import { useMobileReveal } from '@/composables/useMobileReveal'
 
 const authStore = useAuthStore()
 const moviesStore = useMoviesStore()
@@ -204,6 +205,10 @@ function resetFilters() {
   minRating.value = 0
 }
 
+const { displayedItems: displayedMovies, canShowMore: canShowMoreMovies, showMore: showMoreMovies } = useMobileReveal(filteredMovies)
+
+const showMobileFilters = ref(false)
+
 // Losowanie — losuje tytuł z API TMDB (popularne filmy i seriale, spoza własnej listy)
 const showDrawModal = ref(false)
 const drawItems = ref<DrawItem[]>([])
@@ -308,9 +313,10 @@ function handleDrawLike(id: string) {
         type="button"
         @click="openDraw"
         :disabled="drawLoading"
-        class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-orange-500 text-black hover:bg-orange-400 transition-colors disabled:opacity-50 shrink-0"
+        class="flex items-center justify-center gap-1.5 sm:gap-2 p-3 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-bold bg-orange-500 text-black hover:bg-orange-400 transition-colors disabled:opacity-50 shrink-0"
       >
-        <Shuffle class="w-4 h-4" /> {{ drawLoading ? 'Losuję...' : 'Losowanie' }}
+        <Shuffle class="w-6 h-6 sm:w-4 sm:h-4" />
+        <span class="hidden sm:inline">{{ drawLoading ? 'Losuję...' : 'Losowanie' }}</span>
       </button>
     </div>
     <p v-if="drawError" class="-mt-6 mb-6 text-xs text-red-500">{{ drawError }}</p>
@@ -435,7 +441,16 @@ function handleDrawLike(id: string) {
 
         <!-- Lista filmów -->
         <div class="bg-white/90 dark:bg-[#0b1220]/80 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide mb-4">Twoja lista</h3>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">Twoja lista</h3>
+            <button
+              type="button"
+              @click="showMobileFilters = true"
+              class="xl:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-orange-500/40 transition-all cursor-pointer"
+            >
+              <Filter class="w-3.5 h-3.5" /> Filtry
+            </button>
+          </div>
 
           <div v-if="moviesStore.loading" class="flex flex-col items-center justify-center gap-2 py-14 text-slate-400 dark:text-slate-500">
             <Loader2 class="w-6 h-6 animate-spin text-orange-500" />
@@ -444,13 +459,13 @@ function handleDrawLike(id: string) {
 
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <div
-              v-for="movie in filteredMovies"
+              v-for="movie in displayedMovies"
               :key="movie.id"
               class="rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/60 overflow-hidden flex flex-col hover:border-orange-500/40 transition-all"
             >
               <div
                 @click="openMovieDetails(movie)"
-                class="h-32 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-950 relative flex items-center justify-center overflow-hidden cursor-pointer"
+                class="aspect-[5/2] w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-950 relative flex items-center justify-center overflow-hidden cursor-pointer"
               >
                 <img v-if="movie.photoUrl" :src="movie.photoUrl" :alt="movie.title" class="w-full h-full object-cover" />
                 <Clapperboard v-else class="w-8 h-8 text-slate-400 dark:text-slate-700" />
@@ -508,66 +523,51 @@ function handleDrawLike(id: string) {
               {{ moviesStore.movies.length ? 'Brak filmów pasujących do filtrów.' : 'Nie masz jeszcze żadnych filmów na liście — wyszukaj coś powyżej.' }}
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Super-filtr -->
-      <div class="bg-white/90 dark:bg-[#0b1220]/80 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">Super-Filtr</h3>
-          <button type="button" @click="resetFilters" class="text-[10px] font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
-            Wyczyść
+          <button
+            v-if="canShowMoreMovies"
+            type="button"
+            @click="showMoreMovies"
+            class="w-full mt-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-orange-500/40 transition-all cursor-pointer"
+          >
+            Pokaż więcej
           </button>
         </div>
+      </div>
 
-        <div class="space-y-5">
-          <div>
-            <label class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">Status</label>
-            <div class="flex flex-wrap gap-1.5 mt-2">
-              <button
-                v-for="s in (['wszystkie', 'obejrzany', 'do obejrzenia'] as const)"
-                :key="s"
-                @click="statusFilter = s"
-                :class="[
-                  'px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer capitalize',
-                  statusFilter === s
-                    ? 'bg-orange-500/20 border-orange-500/50 text-orange-600 dark:text-orange-400'
-                    : 'bg-slate-100 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700',
-                ]"
-              >
-                {{ s }}
-              </button>
-            </div>
-          </div>
+      <!-- Super-filtr: stały panel na xl+, wysuwany drawer na mobile/tablet -->
+      <div class="hidden xl:block bg-white/90 dark:bg-[#0b1220]/80 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5">
+        <SuperFilterPanel
+          v-model:status-filter="statusFilter"
+          v-model:min-rating="minRating"
+          :selected-genres="selectedGenres"
+          @toggle-genre="toggleGenre"
+          @reset="resetFilters"
+        />
+      </div>
 
-          <div>
-            <label class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">Gatunek</label>
-            <div class="flex flex-wrap gap-1.5 mt-2">
-              <button
-                v-for="g in TMDB_GENRE_NAMES"
-                :key="g"
-                @click="toggleGenre(g)"
-                :class="[
-                  'px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer',
-                  selectedGenres.includes(g)
-                    ? 'bg-orange-500/20 border-orange-500/50 text-orange-600 dark:text-orange-400'
-                    : 'bg-slate-100 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700',
-                ]"
-              >
-                {{ g }}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
-              <span>Min. ocena</span>
-              <span>{{ minRating }}/10</span>
-            </div>
-            <input v-model.number="minRating" type="range" min="0" max="10" class="w-full accent-orange-500" />
+      <Teleport to="body">
+        <div v-if="showMobileFilters" class="xl:hidden fixed inset-0 z-50 flex justify-end">
+          <div class="absolute inset-0 bg-black/50" @click="showMobileFilters = false" />
+          <div class="relative w-full max-w-xs h-full bg-white dark:bg-[#0b1220] border-l border-slate-200 dark:border-slate-800 p-5 pr-12 overflow-y-auto">
+            <button
+              type="button"
+              @click="showMobileFilters = false"
+              class="absolute top-2 right-2 w-10 h-10 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer"
+              title="Zamknij filtry"
+            >
+              <X class="w-5 h-5" />
+            </button>
+            <SuperFilterPanel
+              v-model:status-filter="statusFilter"
+              v-model:min-rating="minRating"
+              :selected-genres="selectedGenres"
+              @toggle-genre="toggleGenre"
+              @reset="resetFilters"
+            />
           </div>
         </div>
-      </div>
+      </Teleport>
     </div>
   </div>
 </template>

@@ -68,7 +68,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="h-screen h-[100dvh] w-screen overflow-hidden bg-slate-100 dark:bg-[#070b14] flex items-center justify-center font-sans relative">
+  <div class="min-h-screen min-h-[100dvh] w-full overflow-y-auto bg-slate-100 dark:bg-[#070b14] flex items-center justify-center font-sans relative py-8">
     
     <Transition name="fade">
       <div 
@@ -112,18 +112,18 @@ const handleLogin = async () => {
     </Transition>
 
     <Transition name="slide-up" appear>
-      <div 
-        v-if="!showIntro" 
-        class="w-full max-w-md p-8 bg-white/90 dark:bg-[#0b1220]/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-2xl backdrop-blur-xl relative z-10 mx-4"
+      <div
+        v-if="!showIntro"
+        class="w-full max-w-md p-6 sm:p-8 bg-white/90 dark:bg-[#0b1220]/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-2xl backdrop-blur-xl relative z-10 mx-4"
       >
         <div class="absolute -top-20 -left-20 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div class="text-center mb-6 relative z-10">
-          <img 
-            src="/logo-1.png" 
-            alt="OGAR Logo" 
-            class="w-50 h-50 object-contain mx-auto mb-3 drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]"
+        <div class="text-center mb-4 sm:mb-6 relative z-10">
+          <img
+            src="/logo-1.png"
+            alt="OGAR Logo"
+            class="w-28 h-28 sm:w-40 sm:h-40 object-contain mx-auto mb-3 drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]"
             />
           <h1 class="text-xl font-black tracking-wider text-slate-900 dark:text-white">
             OGAR <span class="text-orange-500">DASHBOARD</span>

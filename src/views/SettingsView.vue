@@ -3,15 +3,17 @@ import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { useAccentColorStore, DEFAULT_ACCENT_COLOR } from '@/stores/accentColor'
+import { useSecondaryAccentColorStore, DEFAULT_SECONDARY_ACCENT_COLOR } from '@/stores/secondaryAccentColor'
 import { useNavPreferencesStore } from '@/stores/navPreferences'
 import { NAV_ITEMS, ALWAYS_VISIBLE_NAV_NAMES } from '@/lib/navigation'
-import { Settings, User, Camera, Moon, Sun, KeyRound, Mail, Loader2, LayoutList, Wand2 } from 'lucide-vue-next'
+import { Settings, User, Moon, Sun, KeyRound, Mail, Loader2, LayoutList, Wand2 } from 'lucide-vue-next'
 import { ANIMALS, type AnimalId } from '@/data/animalTest'
 import AnimalTestModal from '@/components/settings/AnimalTestModal.vue'
 
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const accentColorStore = useAccentColorStore()
+const secondaryAccentColorStore = useSecondaryAccentColorStore()
 const navPrefsStore = useNavPreferencesStore()
 
 const ACCENT_PRESETS = ['#f97316', '#3b82f6', '#22c55e', '#a855f7', '#ec4899', '#ef4444', '#14b8a6']
@@ -20,9 +22,14 @@ const accentColorInput = computed({
   set: (value: string) => accentColorStore.setColor(value),
 })
 
+const SECONDARY_ACCENT_PRESETS = ['#f59e0b', '#22c55e', '#a855f7', '#ec4899']
+const secondaryAccentColorInput = computed({
+  get: () => secondaryAccentColorStore.color ?? DEFAULT_SECONDARY_ACCENT_COLOR,
+  set: (value: string) => secondaryAccentColorStore.setColor(value),
+})
+
 const hideableNavItems = computed(() => NAV_ITEMS.filter((item) => !ALWAYS_VISIBLE_NAV_NAMES.includes(item.name)))
 
-const fileInput = ref<HTMLInputElement | null>(null)
 const photoPreview = computed(() => authStore.user?.photoURL ?? null)
 
 const displayName = ref(authStore.user?.displayName ?? '')
@@ -55,22 +62,6 @@ const passwordState = ref<{ loading: boolean; error: string; success: string }>(
   success: '',
 })
 
-const pickPhoto = () => fileInput.value?.click()
-
-const onPhotoSelected = async (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  photoState.value = { loading: true, error: '', success: '' }
-  try {
-    await authStore.changePhoto(file)
-    photoState.value = { loading: false, error: '', success: 'Zdjęcie profilowe zostało zaktualizowane.' }
-  } catch {
-    photoState.value = { loading: false, error: 'Nie udało się zmienić zdjęcia. Spróbuj ponownie.', success: '' }
-  } finally {
-    if (fileInput.value) fileInput.value.value = ''
-  }
-}
-
 const showAnimalTest = ref(false)
 const openAnimalTest = () => (showAnimalTest.value = true)
 const closeAnimalTest = () => (showAnimalTest.value = false)
@@ -88,6 +79,16 @@ const applyAnimalResult = async (animalId: AnimalId) => {
     photoState.value = { loading: false, error: 'Nie udało się ustawić avatara. Spróbuj ponownie.', success: '' }
   } finally {
     showAnimalTest.value = false
+  }
+}
+
+const resetPhoto = async () => {
+  photoState.value = { loading: true, error: '', success: '' }
+  try {
+    await authStore.resetPhoto()
+    photoState.value = { loading: false, error: '', success: 'Przywrócono domyślną ikonę.' }
+  } catch {
+    photoState.value = { loading: false, error: 'Nie udało się zresetować avatara. Spróbuj ponownie.', success: '' }
   }
 }
 
@@ -154,38 +155,36 @@ const savePassword = async () => {
         <User class="w-4 h-4 text-orange-600 dark:text-orange-400" /> Profil
       </h3>
 
-      <div class="flex flex-wrap items-center gap-4 mb-5">
-        <div class="relative">
+      <div class="flex flex-col items-center text-center sm:flex-row sm:items-center sm:text-left gap-4 mb-5">
+        <div class="relative shrink-0">
           <div
-            class="w-16 h-16 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-600 dark:text-orange-400 overflow-hidden"
+            class="w-24 h-24 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-600 dark:text-orange-400 overflow-hidden"
           >
             <img v-if="photoPreview" :src="photoPreview" alt="Zdjęcie profilowe" class="w-full h-full object-cover" />
-            <User v-else class="w-7 h-7" />
+            <User v-else class="w-10 h-10" />
           </div>
-          <button
-            @click="pickPhoto"
-            :disabled="photoState.loading"
-            title="Zmień zdjęcie"
-            class="absolute -bottom-1 -right-1 p-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-500/50 transition-all cursor-pointer disabled:opacity-50"
-          >
-            <Loader2 v-if="photoState.loading" class="w-3.5 h-3.5 animate-spin" />
-            <Camera v-else class="w-3.5 h-3.5" />
-          </button>
           <button
             @click="openAnimalTest"
             :disabled="photoState.loading"
             title="Zrób test i wylosuj zwierzę jako avatar"
-            class="absolute -top-1 -right-1 p-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-500/50 transition-all cursor-pointer disabled:opacity-50"
+            class="absolute -bottom-1 -right-1 w-11 h-11 sm:w-7 sm:h-7 flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-500/50 transition-all cursor-pointer disabled:opacity-50"
           >
-            <Wand2 class="w-3.5 h-3.5" />
+            <Loader2 v-if="photoState.loading" class="w-[18px] h-[18px] sm:w-3.5 sm:h-3.5 animate-spin" />
+            <Wand2 v-else class="w-[18px] h-[18px] sm:w-3.5 sm:h-3.5" />
           </button>
-          <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onPhotoSelected" />
         </div>
         <div class="min-w-0">
           <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 break-words">{{ authStore.user?.email }}</p>
-          <p class="text-[11px] text-slate-500">
-            Kliknij ikonę aparatu, aby wgrać zdjęcie, albo ikonę różdżki, aby zrobić test i wylosować zwierzę.
-          </p>
+          <p class="text-[11px] text-slate-500">Kliknij ikonę różdżki, aby zrobić test i wylosować zwierzę jako avatar.</p>
+          <button
+            v-if="photoPreview"
+            type="button"
+            @click="resetPhoto"
+            :disabled="photoState.loading"
+            class="mt-1 text-[11px] font-semibold text-slate-500 hover:text-orange-600 dark:hover:text-orange-400 underline underline-offset-2 cursor-pointer disabled:opacity-50"
+          >
+            Usuń zdjęcie i wróć do domyślnej ikony
+          </button>
         </div>
       </div>
 
@@ -258,7 +257,7 @@ const savePassword = async () => {
         <button
           type="submit"
           :disabled="emailState.loading"
-          class="px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black tracking-wider rounded-xl hover:opacity-90 transition-all shadow-lg shadow-orange-500/20 cursor-pointer disabled:opacity-50 uppercase text-xs"
+          class="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black tracking-wider rounded-xl hover:opacity-90 transition-all shadow-lg shadow-orange-500/20 cursor-pointer disabled:opacity-50 uppercase text-xs"
         >
           Zmień login
         </button>
@@ -310,7 +309,7 @@ const savePassword = async () => {
         <button
           type="submit"
           :disabled="passwordState.loading"
-          class="px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black tracking-wider rounded-xl hover:opacity-90 transition-all shadow-lg shadow-orange-500/20 cursor-pointer disabled:opacity-50 uppercase text-xs"
+          class="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black tracking-wider rounded-xl hover:opacity-90 transition-all shadow-lg shadow-orange-500/20 cursor-pointer disabled:opacity-50 uppercase text-xs"
         >
           Zmień hasło
         </button>
@@ -365,6 +364,35 @@ const savePassword = async () => {
           </button>
         </div>
       </div>
+
+      <div class="mt-5 pt-5 border-t border-slate-200 dark:border-slate-800">
+        <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Drugi kolor (gradient przycisków)</p>
+        <p class="text-[11px] text-slate-500 mb-3">Zastępuje bursztynowy koniec gradientu na przyciskach — razem z kolorem akcentu tworzy pełne przejście kolorów.</p>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            v-for="preset in SECONDARY_ACCENT_PRESETS"
+            :key="preset"
+            type="button"
+            @click="secondaryAccentColorStore.setColor(preset)"
+            :style="{ backgroundColor: preset }"
+            :class="[
+              'w-8 h-8 rounded-full border-2 transition-all cursor-pointer',
+              secondaryAccentColorStore.color === preset ? 'border-slate-900 dark:border-white scale-110' : 'border-transparent',
+            ]"
+            :title="preset"
+          />
+          <label class="w-8 h-8 rounded-full overflow-hidden border border-slate-300 dark:border-slate-700 cursor-pointer relative">
+            <input v-model="secondaryAccentColorInput" type="color" class="absolute -top-1 -left-1 w-10 h-10 cursor-pointer" />
+          </label>
+          <button
+            type="button"
+            @click="secondaryAccentColorStore.resetColor()"
+            class="ml-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-colors"
+          >
+            Domyślny
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- Widoczne zakładki -->
@@ -373,20 +401,20 @@ const savePassword = async () => {
         <LayoutList class="w-4 h-4 text-orange-600 dark:text-orange-400" /> Widoczne zakładki
       </h3>
       <p class="text-[11px] text-slate-500 mb-4">Wybierz, które zakładki mają być widoczne w menu po lewej.</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-2">
         <label
           v-for="item in hideableNavItems"
           :key="item.name"
-          class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/60 cursor-pointer"
+          class="flex items-center gap-3 px-3.5 py-3 sm:px-3 sm:py-2 rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/60 cursor-pointer"
         >
           <input
             type="checkbox"
             :checked="navPrefsStore.isVisible(item.name)"
             @change="navPrefsStore.toggleVisible(item.name)"
-            class="rounded accent-orange-500"
+            class="w-[18px] h-[18px] sm:w-4 sm:h-4 rounded accent-orange-500 shrink-0"
           />
-          <component :is="item.icon" class="w-4 h-4 text-slate-500 shrink-0" />
-          <span class="text-sm text-slate-700 dark:text-slate-300 truncate">{{ item.label }}</span>
+          <component :is="item.icon" class="w-5 h-5 sm:w-4 sm:h-4 text-slate-500 shrink-0" />
+          <span class="text-sm font-medium sm:font-normal text-slate-700 dark:text-slate-300 truncate">{{ item.label }}</span>
         </label>
       </div>
     </section>

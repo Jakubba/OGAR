@@ -82,8 +82,8 @@ function closeModal() {
         <h3 class="text-sm font-black uppercase tracking-wide text-slate-900 dark:text-white truncate pr-2">
           {{ movie.title }}
         </h3>
-        <button type="button" @click="closeModal" class="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
-          <X class="w-4 h-4" />
+        <button type="button" @click="closeModal" class="shrink-0 w-10 h-10 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+          <X class="w-5 h-5" />
         </button>
       </div>
 

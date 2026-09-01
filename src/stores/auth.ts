@@ -78,6 +78,12 @@ export const useAuthStore = defineStore('auth', () => {
     triggerRef(user)
   }
 
+  async function resetPhoto() {
+    if (!user.value) throw new Error('Brak zalogowanego użytkownika')
+    await updateProfile(user.value, { photoURL: null })
+    triggerRef(user)
+  }
+
   return {
     user,
     loading,
@@ -89,5 +95,6 @@ export const useAuthStore = defineStore('auth', () => {
     changePassword,
     changePhoto,
     setPhotoFromUrl,
+    resetPhoto,
   }
 })

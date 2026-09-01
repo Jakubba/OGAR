@@ -213,14 +213,14 @@ function closeModal() {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click.self="closeModal">
-    <div class="w-full max-w-sm max-h-[90vh] overflow-y-auto overscroll-contain rounded-3xl bg-white dark:bg-[#0b1220] shadow-2xl border border-slate-200 dark:border-slate-800">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4" @click.self="closeModal">
+    <div class="w-full h-full sm:h-auto sm:max-w-sm sm:max-h-[90vh] overflow-y-auto overscroll-contain rounded-none sm:rounded-3xl bg-white dark:bg-[#0b1220] shadow-2xl border-0 sm:border border-slate-200 dark:border-slate-800">
       <div class="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-slate-200 dark:border-slate-800">
         <h3 class="text-sm font-black uppercase tracking-wide text-slate-900 dark:text-white">
           {{ kind === 'music' ? 'Losowy utwór' : 'Losowy tytuł' }}
         </h3>
-        <button type="button" @click="closeModal" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
-          <X class="w-4 h-4" />
+        <button type="button" @click="closeModal" class="w-10 h-10 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+          <X class="w-5 h-5" />
         </button>
       </div>
 

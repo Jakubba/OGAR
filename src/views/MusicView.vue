@@ -6,6 +6,7 @@ import { useMusicStore, type Track, type TrackStatus } from '@/stores/music'
 import { useMusicPlaylistsStore } from '@/stores/musicPlaylists'
 import { getRandomTracks, searchTracks, type ItunesSearchResult } from '@/lib/itunes'
 import RandomDrawModal, { type DrawItem } from '@/components/media/RandomDrawModal.vue'
+import { useMobileReveal } from '@/composables/useMobileReveal'
 
 const authStore = useAuthStore()
 const musicStore = useMusicStore()
@@ -357,6 +358,11 @@ const filteredTracks = computed(() =>
   }),
 )
 
+const { displayedItems: displayedTracks, canShowMore: canShowMoreTracks, showMore: showMoreTracks } = useMobileReveal(
+  filteredTracks,
+  { initial: 5, firstStep: 5, nextStep: 5 },
+)
+
 function resetFilters() {
   selectedPlatforms.splice(0, selectedPlatforms.length)
   selectedGenres.splice(0, selectedGenres.length)
@@ -377,9 +383,10 @@ function resetFilters() {
         type="button"
         @click="openDraw"
         :disabled="drawLoading"
-        class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-orange-500 text-black hover:bg-orange-400 transition-colors disabled:opacity-50"
+        class="flex items-center justify-center gap-2 p-3 sm:px-4 sm:py-2 rounded-xl text-sm font-bold bg-orange-500 text-black hover:bg-orange-400 transition-colors disabled:opacity-50"
       >
-        <Shuffle class="w-4 h-4" /> {{ drawLoading ? 'Losuję...' : 'Losowanie' }}
+        <Shuffle class="w-6 h-6 sm:w-4 sm:h-4" />
+        <span class="hidden sm:inline">{{ drawLoading ? 'Losuję...' : 'Losowanie' }}</span>
       </button>
     </div>
     <p v-if="drawError" class="-mt-6 mb-6 text-xs text-red-500">{{ drawError }}</p>
@@ -404,12 +411,12 @@ function resetFilters() {
           <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide mb-3">Playlisty</h3>
           <p v-if="playlistError" class="text-xs text-red-500 mb-2">{{ playlistError }}</p>
 
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
             <div
               v-for="p in playlistsStore.playlists"
               :key="p.id"
               :class="[
-                'flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-xl text-sm font-semibold border transition-all min-w-0 max-w-full',
+                'flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-xl text-sm font-semibold border transition-all min-w-0 w-full sm:w-auto sm:max-w-full',
                 selectedPlaylistId === p.id
                   ? 'bg-orange-500/20 border-orange-500/50 text-orange-600 dark:text-orange-400'
                   : 'border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700',
@@ -422,11 +429,11 @@ function resetFilters() {
                   autofocus
                   @keyup.enter="confirmRenamePlaylist"
                   @blur="confirmRenamePlaylist"
-                  class="w-28 px-1.5 py-0.5 rounded-md text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 outline-none"
+                  class="w-full sm:w-28 px-1.5 py-0.5 rounded-md text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 outline-none"
                 />
               </template>
               <template v-else>
-                <button type="button" @click="selectedPlaylistId = p.id" class="cursor-pointer max-w-[140px] sm:max-w-[220px] truncate text-left">{{ p.name }}</button>
+                <button type="button" @click="selectedPlaylistId = p.id" class="flex-1 min-w-0 sm:flex-initial sm:max-w-[220px] truncate text-left cursor-pointer">{{ p.name }}</button>
                 <button
                   v-if="selectedPlaylistId === p.id"
                   type="button"
@@ -448,14 +455,14 @@ function resetFilters() {
               </template>
             </div>
 
-            <div v-if="showNewPlaylistInput" class="flex items-center gap-1.5">
+            <div v-if="showNewPlaylistInput" class="flex items-center gap-1.5 w-full sm:w-auto">
               <input
                 v-model="newPlaylistName"
                 type="text"
                 placeholder="Nazwa playlisty"
                 autofocus
                 @keyup.enter="createPlaylist"
-                class="w-32 px-2 py-1.5 rounded-lg text-sm bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 outline-none"
+                class="flex-1 min-w-0 sm:w-32 px-2 py-1.5 rounded-lg text-sm bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 outline-none"
               />
               <button type="button" @click="createPlaylist" class="p-1.5 rounded-lg bg-orange-500 text-black hover:bg-orange-400 transition-colors">
                 <Check class="w-3.5 h-3.5" />
@@ -468,7 +475,7 @@ function resetFilters() {
               v-else
               type="button"
               @click="showNewPlaylistInput = true"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold text-orange-600 dark:text-orange-400 border border-dashed border-orange-500/40 hover:bg-orange-500/10 transition-colors"
+              class="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold text-orange-600 dark:text-orange-400 border border-dashed border-orange-500/40 hover:bg-orange-500/10 transition-colors"
             >
               <Plus class="w-3.5 h-3.5" /> Nowa playlista
             </button>
@@ -582,7 +589,7 @@ function resetFilters() {
 
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <div
-              v-for="track in filteredTracks"
+              v-for="track in displayedTracks"
               :key="track.id"
               class="rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/60 overflow-hidden flex flex-col hover:border-orange-500/40 transition-all"
             >
@@ -647,6 +654,15 @@ function resetFilters() {
               {{ playlistTracks.length ? 'Brak utworów pasujących do filtrów.' : 'Ta playlista jest jeszcze pusta — wyszukaj coś powyżej.' }}
             </div>
           </div>
+
+          <button
+            v-if="canShowMoreTracks"
+            type="button"
+            @click="showMoreTracks"
+            class="w-full mt-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-orange-500/40 transition-all cursor-pointer"
+          >
+            Zobacz więcej
+          </button>
         </div>
       </div>
 

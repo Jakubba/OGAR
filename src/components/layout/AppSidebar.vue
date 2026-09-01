@@ -43,7 +43,7 @@ const footerBadge = computed<FooterBadge>(() => {
 <template>
   <aside
     :class="[
-      'w-72 sm:w-64 bg-white/95 dark:bg-[#0a101d]/95 lg:bg-white/80 lg:dark:bg-[#0a101d]/80 backdrop-blur-xl border-r border-slate-200/70 dark:border-slate-800/60 flex flex-col justify-between z-40 shrink-0',
+      'w-full sm:w-64 bg-white/95 dark:bg-[#0a101d]/95 lg:bg-white/80 lg:dark:bg-[#0a101d]/80 backdrop-blur-xl border-r border-slate-200/70 dark:border-slate-800/60 flex flex-col justify-between z-40 shrink-0',
       'fixed inset-y-0 left-0 transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0',
       open ? 'translate-x-0' : '-translate-x-full',
     ]"
@@ -52,10 +52,10 @@ const footerBadge = computed<FooterBadge>(() => {
       <div class="p-6 border-b border-slate-200/70 dark:border-slate-800/60 flex flex-col items-center text-center gap-2 relative">
         <button
           @click="emit('close')"
-          class="absolute top-3 right-3 p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer lg:hidden"
+          class="absolute top-1 right-1 w-11 h-11 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer lg:hidden"
           title="Zamknij menu"
         >
-          <X class="w-4 h-4" />
+          <X class="w-5 h-5" />
         </button>
         <img src="/logo-1.png" alt="OGAR" class="w-20 h-20 object-contain" />
         <div>

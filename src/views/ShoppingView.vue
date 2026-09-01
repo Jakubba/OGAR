@@ -555,14 +555,14 @@ function exportProductsCatalog() {
       <!-- Katalog produktów -->
       <div class="space-y-6">
         <div class="bg-white/90 dark:bg-[#0b1220]/80 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4">
-          <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-3">Katalog produktów</h3>
+          <h3 class="text-sm sm:text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-3">Katalog produktów</h3>
           <div class="relative mb-3">
             <Search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
               v-model="catalogSearch"
               type="text"
               placeholder="Szukaj produktów..."
-              class="w-full pl-9 pr-9 py-2 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-orange-500/50"
+              class="w-full pl-9 pr-9 py-3 sm:py-2 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl text-sm sm:text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-orange-500/50"
             />
             <Filter class="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
           </div>
@@ -572,40 +572,40 @@ function exportProductsCatalog() {
             <button
               @click="triggerProductImport"
               :disabled="productImporting"
-              class="py-2 rounded-xl bg-orange-500/10 border border-orange-500/40 text-orange-600 dark:text-orange-400 text-[11px] font-bold flex items-center justify-center gap-1.5 hover:bg-orange-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="py-3 sm:py-2 rounded-xl bg-orange-500/10 border border-orange-500/40 text-orange-600 dark:text-orange-400 text-xs sm:text-[11px] font-bold flex items-center justify-center gap-1.5 hover:bg-orange-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Upload class="w-3.5 h-3.5" /> {{ productImporting ? 'Importowanie...' : 'Importuj JSON' }}
+              <Upload class="w-4 h-4 sm:w-3.5 sm:h-3.5" /> {{ productImporting ? 'Importowanie...' : 'Importuj JSON' }}
             </button>
             <button
               @click="exportProductsCatalog"
               :disabled="productsStore.products.length === 0"
-              class="py-2 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold flex items-center justify-center gap-1.5 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="py-3 sm:py-2 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs sm:text-[11px] font-bold flex items-center justify-center gap-1.5 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Download class="w-3.5 h-3.5" /> Eksportuj JSON
+              <Download class="w-4 h-4 sm:w-3.5 sm:h-3.5" /> Eksportuj JSON
             </button>
           </div>
-          <p v-if="productImportError" class="text-[11px] text-rose-600 dark:text-rose-400 mb-3">{{ productImportError }}</p>
-          <p v-if="productImportSuccess" class="text-[11px] text-emerald-600 dark:text-emerald-400 mb-3">{{ productImportSuccess }}</p>
-          <p v-if="productExportError" class="text-[11px] text-rose-600 dark:text-rose-400 mb-3">{{ productExportError }}</p>
+          <p v-if="productImportError" class="text-xs sm:text-[11px] text-rose-600 dark:text-rose-400 mb-3">{{ productImportError }}</p>
+          <p v-if="productImportSuccess" class="text-xs sm:text-[11px] text-emerald-600 dark:text-emerald-400 mb-3">{{ productImportSuccess }}</p>
+          <p v-if="productExportError" class="text-xs sm:text-[11px] text-rose-600 dark:text-rose-400 mb-3">{{ productExportError }}</p>
 
           <div class="space-y-2">
             <div
               v-for="product in filteredCatalog"
               :key="product.id"
-              class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/60"
+              class="flex items-center gap-3 p-3 sm:p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/60"
             >
               <img
                 v-if="resolveProductPhoto(product.photoUrl)"
                 :src="resolveProductPhoto(product.photoUrl)"
                 :alt="product.name"
                 @click="openLightbox(product)"
-                class="w-10 h-10 rounded-lg object-cover shrink-0 cursor-zoom-in"
+                class="w-14 h-14 sm:w-10 sm:h-10 rounded-lg object-cover shrink-0 cursor-zoom-in"
               />
-              <div v-else class="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-800 shrink-0" />
+              <div v-else class="w-14 h-14 sm:w-10 sm:h-10 rounded-lg bg-slate-200 dark:bg-slate-800 shrink-0" />
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{{ product.name }}</p>
-                <p class="text-[10px] text-slate-500 truncate">{{ [product.store, product.aisle].filter(Boolean).join(' - ') || 'Bez lokalizacji' }}</p>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400">{{ product.price.toFixed(2) }} zł</p>
+                <p class="text-sm sm:text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{{ product.name }}</p>
+                <p class="text-xs sm:text-[10px] text-slate-500 truncate">{{ [product.store, product.aisle].filter(Boolean).join(' - ') || 'Bez lokalizacji' }}</p>
+                <p class="text-xs sm:text-[10px] text-slate-500 dark:text-slate-400">{{ product.price.toFixed(2) }} zł</p>
               </div>
               <button
                 @click="addFromCatalog(product)"
@@ -616,7 +616,7 @@ function exportProductsCatalog() {
                 <span class="hidden sm:inline">Dodaj</span>
               </button>
             </div>
-            <p v-if="filteredCatalog.length === 0" class="text-xs text-slate-500 text-center py-3">Brak wyników.</p>
+            <p v-if="filteredCatalog.length === 0" class="text-sm sm:text-xs text-slate-500 text-center py-3">Brak wyników.</p>
           </div>
         </div>
 
@@ -639,7 +639,7 @@ function exportProductsCatalog() {
     <button
       type="button"
       @click="showMobileNewProduct = true"
-      class="lg:hidden fixed right-4 bottom-[calc(4rem+env(safe-area-inset-bottom)+1rem)] z-40 w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-black shadow-[0_0_50px_10px_rgba(249,115,22,0.45),0_16px_45px_-4px_rgba(245,158,11,0.4)] flex items-center justify-center hover:brightness-110 hover:shadow-[0_0_60px_14px_rgba(249,115,22,0.55),0_18px_55px_-2px_rgba(245,158,11,0.5)] transition-all cursor-pointer"
+      class="lg:hidden fixed right-4 bottom-[calc(4rem+env(safe-area-inset-bottom)+1rem)] z-40 w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-black shadow-[0_0_50px_10px_color-mix(in_srgb,var(--color-amber-500)_45%,transparent)] flex items-center justify-center hover:brightness-110 hover:shadow-[0_0_60px_14px_color-mix(in_srgb,var(--color-amber-500)_55%,transparent)] transition-all cursor-pointer"
       title="Stwórz nowy produkt"
     >
       <Plus class="w-6 h-6" />

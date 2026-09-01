@@ -43,12 +43,12 @@ const footerBadge = computed<FooterBadge>(() => {
 <template>
   <aside
     :class="[
-      'w-full sm:w-64 bg-white/95 dark:bg-[#0a101d]/95 lg:bg-white/80 lg:dark:bg-[#0a101d]/80 backdrop-blur-xl border-r border-slate-200/70 dark:border-slate-800/60 flex flex-col justify-between z-40 shrink-0',
+      'w-full sm:w-64 bg-white/95 dark:bg-[#0a101d]/95 lg:bg-white/80 lg:dark:bg-[#0a101d]/80 backdrop-blur-xl border-r border-slate-200/70 dark:border-slate-800/60 flex flex-col z-40 shrink-0 overflow-hidden',
       'fixed inset-y-0 left-0 transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0',
       open ? 'translate-x-0' : '-translate-x-full',
     ]"
   >
-    <div>
+    <div class="shrink-0">
       <div class="p-6 border-b border-slate-200/70 dark:border-slate-800/60 flex flex-col items-center text-center gap-2 relative">
         <button
           @click="emit('close')"
@@ -63,8 +63,9 @@ const footerBadge = computed<FooterBadge>(() => {
           <p class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Dashboard</p>
         </div>
       </div>
+    </div>
 
-      <nav class="p-4 space-y-1.5 overflow-y-auto">
+    <nav class="flex-1 min-h-0 overflow-y-auto p-4 space-y-1.5">
         <RouterLink
           v-for="item in navItems"
           :key="item.name"
@@ -92,10 +93,9 @@ const footerBadge = computed<FooterBadge>(() => {
             {{ item.badge }}
           </span>
         </RouterLink>
-      </nav>
-    </div>
+    </nav>
 
-    <div class="p-4 border-t border-slate-200/70 dark:border-slate-800/60">
+    <div class="shrink-0 p-4 border-t border-slate-200/70 dark:border-slate-800/60">
       <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-lg bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0">
